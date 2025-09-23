@@ -2,6 +2,19 @@ import React, { useEffect, useState } from "react";
 import { supabase } from '../../utils/supabase';
 
 
+import { sendTelegramMessage } from "../../utils/telegram"; // المسار حسب موقع الملف
+
+if (!error) {
+  const message = `✅ تم استلام طلب جديد:
+العميل: ${orderData.customer_name}
+المجموع: ${orderData.total_price} جنيه`;
+  
+  await sendTelegramMessage(message);
+}
+
+
+
+
 const OrdersManagement = () => {
   const [orders, setOrders] = useState([]);
 
