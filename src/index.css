@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* تخصيصات إضافية */
+body {
+  font-family: "Tajawal", sans-serif;
+}
+
+button {
+  transition: all 0.2s ease-in-out;
+}
