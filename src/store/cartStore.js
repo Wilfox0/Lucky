@@ -1,65 +1,86 @@
 import { create } from "zustand";
-import { toast } from "react-hot-toast";
+import notify from "../components/ToastNotification";
 
-const useCartStore = create((set, get) => ({
-  cart: [],
+export const useCartStore = create((set, get) => ({
+  cartItems: [],
 
-  addToCart: (product, selectedColor, selectedSize, quantity = 1) => {
-    const cart = get().cart;
-    const existingItemIndex = cart.findIndex(
-      (item) =>
-        item.id === product.id &&
-        item.color === selectedColor &&
-        item.size === selectedSize
-    );
+  addToCart: (product) => {
+    const state = get();
+    const existing = state.cartItems.find((item) => item.id === product.id);
 
-    if (existingItemIndex >= 0) {
-      const existingItem = cart[existingItemIndex];
-      const newQuantity = existingItem.quantity + quantity;
+    if (product.quantity <= 0) {
+      notify.outOfStock(product.name);
+      return;
+    }
 
-      if (newQuantity > product.quantity) {
-        toast.error(`الحد الأقصى المتاح هو ${product.quantity} قطعة فقط`);
+    if (existing) {
+      if (existing.quantity + 1 > product.quantity) {
+        notify.outOfStockLimit(product.name, product.quantity); // ✅ إشعار الحد الأقصى
         return;
       }
-
-      const updatedItem = { ...existingItem, quantity: newQuantity };
-      const updatedCart = [...cart];
-      updatedCart[existingItemIndex] = updatedItem;
-
-      set({ cart: updatedCart });
-      toast.success("تم تحديث الكمية في السلة");
+      set({
+        cartItems: state.cartItems.map((item) =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        ),
+      });
+      notify.quantityUpdated(product.name, existing.quantity + 1);
     } else {
-      if (quantity > product.quantity) {
-        toast.error(`الحد الأقصى المتاح هو ${product.quantity} قطعة فقط`);
-        return;
-      }
-
-      const newItem = {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        image: product.images?.[0],
-        color: selectedColor,
-        size: selectedSize,
-        quantity,
-      };
-
-      set({ cart: [...cart, newItem] });
-      toast.success("تمت إضافة المنتج إلى السلة");
+      set({
+        cartItems: [
+          ...state.cartItems,
+          { ...product, quantity: 1, maxQuantity: product.quantity },
+        ],
+      });
+      notify.added(product.name);
     }
   },
 
-  removeFromCart: (id, color, size) =>
-    set((state) => ({
-      cart: state.cart.filter(
-        (item) => !(item.id === id && item.color === color && item.size === size)
-      ),
-    })),
+  removeFromCart: (id) => {
+    const state = get();
+    const item = state.cartItems.find((i) => i.id === id);
+    if (item) notify.removed(item.name);
+    set({ cartItems: state.cartItems.filter((item) => item.id !== id) });
+  },
 
   clearCart: () => {
-    set({ cart: [] });
-    toast.success("تم إفراغ السلة");
+    set({ cartItems: [] });
+    notify.cleared();
+  },
+
+  increase: (id) => {
+    const state = get();
+    const item = state.cartItems.find((i) => i.id === id);
+    if (!item) return;
+    if (item.quantity + 1 > item.maxQuantity) {
+      notify.outOfStockLimit(item.name, item.maxQuantity); // ✅ إشعار الحد الأقصى
+      return;
+    }
+    set({
+      cartItems: state.cartItems.map((i) =>
+        i.id === id ? { ...i, quantity: i.quantity + 1 } : i
+      ),
+    });
+    notify.quantityUpdated(item.name, item.quantity + 1);
+  },
+
+  decrease: (id) => {
+    const state = get();
+    const item = state.cartItems.find((i) => i.id === id);
+    if (!item) return;
+    const newQty = item.quantity - 1;
+    set({
+      cartItems: state.cartItems
+        .map((i) => (i.id === id ? { ...i, quantity: newQty } : i))
+        .filter((i) => i.quantity > 0),
+    });
+    if (newQty > 0) notify.quantityUpdated(item.name, newQty);
+    else notify.quantityUpdated(item.name, 0);
+  },
+
+  confirmOrder: () => {
+    set({ cartItems: [] });
+    notify.orderConfirmed();
   },
 }));
-
-export default useCartStore;
