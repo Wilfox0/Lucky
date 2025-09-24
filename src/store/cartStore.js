@@ -9,13 +9,13 @@ export const useCartStore = create((set, get) => ({
     const existing = state.cartItems.find((item) => item.id === product.id);
 
     if (product.quantity <= 0) {
-      notify.outOfStock(product.name);
+      notify.outOfStockLimit(product.name, 0);
       return;
     }
 
     if (existing) {
       if (existing.quantity + 1 > product.quantity) {
-        notify.outOfStockLimit(product.name, product.quantity); // ✅ إشعار الحد الأقصى
+        notify.outOfStockLimit(product.name, product.quantity);
         return;
       }
       set({
@@ -28,10 +28,7 @@ export const useCartStore = create((set, get) => ({
       notify.quantityUpdated(product.name, existing.quantity + 1);
     } else {
       set({
-        cartItems: [
-          ...state.cartItems,
-          { ...product, quantity: 1, maxQuantity: product.quantity },
-        ],
+        cartItems: [...state.cartItems, { ...product, quantity: 1, maxQuantity: product.quantity }],
       });
       notify.added(product.name);
     }
@@ -54,7 +51,7 @@ export const useCartStore = create((set, get) => ({
     const item = state.cartItems.find((i) => i.id === id);
     if (!item) return;
     if (item.quantity + 1 > item.maxQuantity) {
-      notify.outOfStockLimit(item.name, item.maxQuantity); // ✅ إشعار الحد الأقصى
+      notify.outOfStockLimit(item.name, item.maxQuantity);
       return;
     }
     set({
