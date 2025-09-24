@@ -6,8 +6,11 @@ const notify = {
   cleared: () => toast.warn("تم إفراغ السلة بالكامل"),
   quantityUpdated: (name, qty) =>
     toast.info(`تم تحديث ${name} إلى ${qty} قطع`),
+  outOfStock: (name) =>
+    toast.error(`${name} غير متوفر حالياً بالمخزون`),
   outOfStockLimit: (name, stock) =>
-    toast.error(`${name} أقصى كمية ممكنة ${stock}`),
+    toast.error(`${name} أقصى كمية ممكنة ${stock}`), // ✅ هنا أضفت الرسالة اللي انت محتاجها
+  orderConfirmed: () => toast.success("تم تأكيد طلبك بنجاح 🎉"),
 };
 
 export default notify;
