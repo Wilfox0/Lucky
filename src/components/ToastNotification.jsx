@@ -1,12 +1,13 @@
 import { toast } from "react-toastify";
 
 const notify = {
-  addToCart: (name) => toast.success(`${name} تمت إضافته للسلة`),
+  added: (name) => toast.success(`${name} تمت إضافته للسلة`),
+  removed: (name) => toast.info(`${name} تم حذفه من السلة`),
+  cleared: () => toast.warn("تم إفراغ السلة بالكامل"),
   quantityUpdated: (name, qty) =>
-    toast.info(`${name} الكمية الجديدة: ${qty}`),
-  outOfStock: (name) => toast.error(`${name} غير متاح حالياً`),
-  cartCleared: () => toast.info("تم إفراغ السلة"),
-  orderConfirmed: () => toast.success("تم تأكيد الطلب بنجاح 🎉"),
+    toast.info(`تم تحديث ${name} إلى ${qty} قطع`),
+  outOfStockLimit: (name, stock) =>
+    toast.error(`${name} أقصى كمية ممكنة ${stock}`),
 };
 
 export default notify;
