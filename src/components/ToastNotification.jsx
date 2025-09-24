@@ -4,12 +4,9 @@ const notify = {
   added: (name) => toast.success(`${name} تمت إضافته للسلة`),
   removed: (name) => toast.info(`${name} تم حذفه من السلة`),
   cleared: () => toast.warn("تم إفراغ السلة بالكامل"),
-  quantityUpdated: (name, qty) =>
-    toast.info(`تم تحديث ${name} إلى ${qty} قطع`),
-  outOfStockLimit: (name, stock) =>
-    toast.error(`${name} أقصى كمية ممكنة ${stock}`),
-  orderConfirmed: () =>
-    toast.success("تم تأكيد الطلب بنجاح، شكراً لتسوقك معنا!"),
+  quantityUpdated: (name, qty) => toast.info(`تم تحديث ${name} إلى ${qty} قطع`),
+  outOfStockLimit: (name, stock) => toast.error(`${name} أقصى كمية ممكنة ${stock}`),
+  orderConfirmed: () => toast.success("تم تأكيد الأوردر بنجاح!"),
 };
 
 export default notify;
