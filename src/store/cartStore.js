@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import notify from "../components/ToastNotification";
+import { sendTelegramMessage } from "../utils/telegram";
 
 export const useCartStore = create((set, get) => ({
   cartItems: [],
@@ -76,8 +77,11 @@ export const useCartStore = create((set, get) => ({
     else notify.quantityUpdated(item.name, 0);
   },
 
-  confirmOrder: () => {
+  confirmOrder: async (orderData) => {
     set({ cartItems: [] });
     notify.orderConfirmed();
+
+    const message = `طلب جديد من ${orderData.customer_name}\nالهاتف: ${orderData.phone}\nالعنوان: ${orderData.address}\nالمجموع: ${orderData.total_price}`;
+    await sendTelegramMessage(message);
   },
 }));
