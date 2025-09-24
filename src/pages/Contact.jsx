@@ -1,27 +1,26 @@
-import React, { useState } from "react";
+import React from "react";
 
 const Contact = () => {
-  const [whatsAppNumber] = useState("+201234567890");
+  const whatsappNumber = "+201234567890"; // رقم الواتساب
+  const whatsappLink = `https://wa.me/${whatsappNumber.replace("+","")}`;
 
   return (
-    <div className="flex justify-center items-center h-screen">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-6">
+      <h1 className="text-3xl font-bold mb-6">تواصل معنا عبر واتساب</h1>
       <a
-        href={`https://wa.me/${whatsAppNumber.replace(/\+/g, "")}`}
+        href={whatsappLink}
         target="_blank"
         rel="noopener noreferrer"
-        className="bg-green-500 text-white px-6 py-4 rounded-full text-xl hover:bg-green-600 transition flex items-center gap-2"
+        className="flex items-center bg-green-500 text-white px-6 py-3 rounded-lg text-xl hover:bg-green-600 transition"
       >
         <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="white"
+          className="w-6 h-6 mr-2"
+          fill="currentColor"
           viewBox="0 0 24 24"
-          width="24"
-          height="24"
         >
-          <path d="M20.52 3.48a11.79 11.79 0 00-16.67 16.67l-1.96 5.56 5.71-1.5a11.79 11.79 0 0013.92-20.73zm-1.14 18.33a9.57 9.57 0 01-13.59-13.59 9.57 9.57 0 0113.59 13.59z" />
-          <path d="M17.5 14.5c-.29-.15-1.72-.85-1.98-.95-.26-.1-.45-.15-.64.15s-.73.95-.9 1.15c-.16.21-.33.24-.61.08-.29-.15-1.23-.45-2.35-1.44-.87-.77-1.45-1.71-1.62-2 .16-.29.01-.44-.11-.59-.11-.15-.64-1.54-.88-2.11-.23-.55-.47-.48-.64-.49-.16-.01-.35-.01-.54-.01s-.54.08-.82.39c-.29.31-1.1 1.08-1.1 2.64 0 1.55 1.13 3.05 1.29 3.26.16.21 2.23 3.5 5.41 4.91.76.33 1.35.53 1.81.68.76.23 1.45.2 1.99.12.61-.09 1.72-.7 1.96-1.37.24-.67.24-1.25.17-1.37-.07-.12-.26-.19-.54-.34z" />
+          <path d="M20.52 3.48a11.77 11.77 0 00-16.6 0 11.77 11.77 0 000 16.6l-1.52 5.53 5.53-1.52a11.77 11.77 0 0016.6-16.6zM12 20a8 8 0 110-16 8 8 0 010 16zm1-11h-2v4h2v-4zm0 6h-2v2h2v-2z"/>
         </svg>
-        تواصل معنا عبر واتس اب
+        افتح المحادثة
       </a>
     </div>
   );
