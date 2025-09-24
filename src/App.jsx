@@ -20,7 +20,10 @@ import "react-toastify/dist/ReactToastify.css";
 function App() {
   return (
     <div className="min-h-screen flex flex-col">
+      {/* الهيدر */}
       <Header />
+
+      {/* الصفحات */}
       <main className="flex-1 p-4">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -35,7 +38,11 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
+
+      {/* الفوتر */}
       <Footer />
+
+      {/* إشعارات */}
       <ToastContainer
         position="top-right"
         autoClose={3000}
