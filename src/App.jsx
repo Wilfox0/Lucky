@@ -1,66 +1,59 @@
+// src/App.jsx
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
-
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-import Home from "./pages/Home";
+import HomePage from "./pages/HomePage";
+import Products from "./pages/Products";
 import ProductDetails from "./pages/ProductDetails";
 import Cart from "./pages/Cart";
-import OrderReview from "./pages/OrderReview";
-import AdminLogin from "./pages/AdminLogin";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import NotFound from "./pages/NotFound";
-import Shop from "./pages/Shop";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
-
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-
-import { useSettingsStore } from "./store/settingsStore";
+import NotFound from "./pages/NotFound";
+import AdminLogin from "./pages/AdminLogin";
+import AdminLayout from "./pages/admin/AdminLayout";
+import Dashboard from "./pages/admin/Dashboard";
+import ProductsManagement from "./pages/admin/ProductsManagement";
+import CategoriesManagement from "./pages/admin/CategoriesManagement";
+import ShippingManagement from "./pages/admin/ShippingManagement";
+import SocialLinksManagement from "./pages/admin/SocialLinksManagement";
+import SettingsManagement from "./pages/admin/SettingsManagement";
+import OrdersManagement from "./pages/admin/OrdersManagement";
+import OrderReview from "./pages/OrderReview";
 
 function App() {
-  const { isAdmin } = useSettingsStore();
-
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
+    <Router>
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-grow">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/product/:id" element={<ProductDetails />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/order-review" element={<OrderReview />} />
 
-      <main className="flex-1 p-4">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/shop" element={<Shop />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/product/:id" element={<ProductDetails />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/review" element={<OrderReview />} />
+            {/* Admin routes */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="products" element={<ProductsManagement />} />
+              <Route path="categories" element={<CategoriesManagement />} />
+              <Route path="shipping" element={<ShippingManagement />} />
+              <Route path="social-links" element={<SocialLinksManagement />} />
+              <Route path="settings" element={<SettingsManagement />} />
+              <Route path="orders" element={<OrdersManagement />} />
+            </Route>
 
-          {/* Admin Routes */}
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route
-            path="/admin/*"
-            element={isAdmin ? <AdminDashboard /> : <Navigate to="/admin/login" />}
-          />
-
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </main>
-
-      <Footer />
-
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        rtl
-        pauseOnHover
-        draggable
-        pauseOnFocusLoss
-      />
-    </div>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </Router>
   );
 }
 
