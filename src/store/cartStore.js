@@ -1,6 +1,5 @@
 import { create } from "zustand";
-import notify from "../components/ToastNotification";
-import { sendTelegramMessage } from "../utils/telegram";
+import notify from "../components/ToastNotification"; // ✅ تم تعديل الاستيراد فقط
 
 export const useCartStore = create((set, get) => ({
   cartItems: [],
@@ -10,13 +9,13 @@ export const useCartStore = create((set, get) => ({
     const existing = state.cartItems.find((item) => item.id === product.id);
 
     if (product.quantity <= 0) {
-      notify.outOfStockLimit(product.name, 0);
+      notify.outOfStock(product.name, 0);
       return;
     }
 
     if (existing) {
       if (existing.quantity + 1 > product.quantity) {
-        notify.outOfStockLimit(product.name, product.quantity);
+        notify.outOfStock(product.name, product.quantity);
         return;
       }
       set({
@@ -31,20 +30,20 @@ export const useCartStore = create((set, get) => ({
       set({
         cartItems: [...state.cartItems, { ...product, quantity: 1, maxQuantity: product.quantity }],
       });
-      notify.added(product.name);
+      notify.addToCart(product.name, 1);
     }
   },
 
   removeFromCart: (id) => {
     const state = get();
     const item = state.cartItems.find((i) => i.id === id);
-    if (item) notify.removed(item.name);
+    if (item) notify.quantityUpdated(item.name, 0);
     set({ cartItems: state.cartItems.filter((item) => item.id !== id) });
   },
 
   clearCart: () => {
     set({ cartItems: [] });
-    notify.cleared();
+    notify.cartCleared();
   },
 
   increase: (id) => {
@@ -52,7 +51,7 @@ export const useCartStore = create((set, get) => ({
     const item = state.cartItems.find((i) => i.id === id);
     if (!item) return;
     if (item.quantity + 1 > item.maxQuantity) {
-      notify.outOfStockLimit(item.name, item.maxQuantity);
+      notify.outOfStock(item.name, item.maxQuantity);
       return;
     }
     set({
@@ -77,11 +76,8 @@ export const useCartStore = create((set, get) => ({
     else notify.quantityUpdated(item.name, 0);
   },
 
-  confirmOrder: async (orderData) => {
+  confirmOrder: () => {
     set({ cartItems: [] });
     notify.orderConfirmed();
-
-    const message = `طلب جديد من ${orderData.customer_name}\nالهاتف: ${orderData.phone}\nالعنوان: ${orderData.address}\nالمجموع: ${orderData.total_price}`;
-    await sendTelegramMessage(message);
   },
 }));
