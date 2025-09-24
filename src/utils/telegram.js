@@ -1,16 +1,11 @@
+// 📌 إرسال إشعارات إلى تليجرام
 export async function sendTelegramMessage(message) {
-  const botToken = process.env.REACT_APP_TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.REACT_APP_TELEGRAM_CHAT_ID;
+  const botToken = "8351490932:AAGJ7JRAFLCG5g-qo-VHzCP0-vqjL1GVn7w";
+  const chatId = "1092353140";
 
-  if (!botToken || !chatId) return;
-
-  try {
-    await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: chatId, text: message }),
-    });
-  } catch (error) {
-    console.error("Telegram message failed:", error);
-  }
+  await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ chat_id: chatId, text: message }),
+  });
 }
