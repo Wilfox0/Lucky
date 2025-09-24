@@ -2,10 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-/* تخصيصات إضافية */
 body {
   font-family: "Tajawal", sans-serif;
-  background-color: #f9fafb;
-  margin: 0;
-  padding: 0;
+}
+
+button {
+  transition: all 0.2s ease-in-out;
 }
