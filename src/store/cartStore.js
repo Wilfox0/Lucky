@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import notify from "../components/ToastNotification"; // ✅ تم تعديل الاستيراد فقط
+import notify from "../components/ToastNotification";
 
 export const useCartStore = create((set, get) => ({
   cartItems: [],
@@ -9,13 +9,13 @@ export const useCartStore = create((set, get) => ({
     const existing = state.cartItems.find((item) => item.id === product.id);
 
     if (product.quantity <= 0) {
-      notify.outOfStock(product.name, 0);
+      notify.outOfStockLimit(product.name, 0);
       return;
     }
 
     if (existing) {
       if (existing.quantity + 1 > product.quantity) {
-        notify.outOfStock(product.name, product.quantity);
+        notify.outOfStockLimit(product.name, product.quantity);
         return;
       }
       set({
@@ -30,20 +30,20 @@ export const useCartStore = create((set, get) => ({
       set({
         cartItems: [...state.cartItems, { ...product, quantity: 1, maxQuantity: product.quantity }],
       });
-      notify.addToCart(product.name, 1);
+      notify.added(product.name);
     }
   },
 
   removeFromCart: (id) => {
     const state = get();
     const item = state.cartItems.find((i) => i.id === id);
-    if (item) notify.quantityUpdated(item.name, 0);
+    if (item) notify.removed(item.name);
     set({ cartItems: state.cartItems.filter((item) => item.id !== id) });
   },
 
   clearCart: () => {
     set({ cartItems: [] });
-    notify.cartCleared();
+    notify.cleared();
   },
 
   increase: (id) => {
@@ -51,7 +51,7 @@ export const useCartStore = create((set, get) => ({
     const item = state.cartItems.find((i) => i.id === id);
     if (!item) return;
     if (item.quantity + 1 > item.maxQuantity) {
-      notify.outOfStock(item.name, item.maxQuantity);
+      notify.outOfStockLimit(item.name, item.maxQuantity);
       return;
     }
     set({
