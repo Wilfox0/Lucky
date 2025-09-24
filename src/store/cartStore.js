@@ -1,83 +1,62 @@
 import { create } from "zustand";
-import notify from "../components/ToastNotification"; // ✅ تم تعديل الاستيراد فقط
+import notify from "../components/ToastNotification";
 
-export const useCartStore = create((set, get) => ({
-  cartItems: [],
+const useCartStore = create((set) => ({
+  items: [],
 
-  addToCart: (product) => {
-    const state = get();
-    const existing = state.cartItems.find((item) => item.id === product.id);
-
-    if (product.quantity <= 0) {
-      notify.outOfStock(product.name, 0);
-      return;
-    }
-
-    if (existing) {
-      if (existing.quantity + 1 > product.quantity) {
-        notify.outOfStock(product.name, product.quantity);
-        return;
+  add: (product) =>
+    set((state) => {
+      const existing = state.items.find((item) => item.id === product.id);
+      if (existing) {
+        if (existing.quantity < product.stock) {
+          existing.quantity += 1;
+          notify.quantityUpdated(product.name, existing.quantity);
+        } else {
+          notify.outOfStockLimit(product.name, product.stock);
+        }
+      } else {
+        state.items.push({ ...product, quantity: 1 });
+        notify.added(product.name);
       }
-      set({
-        cartItems: state.cartItems.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        ),
-      });
-      notify.quantityUpdated(product.name, existing.quantity + 1);
-    } else {
-      set({
-        cartItems: [...state.cartItems, { ...product, quantity: 1, maxQuantity: product.quantity }],
-      });
-      notify.addToCart(product.name, 1);
-    }
-  },
+      return { items: [...state.items] };
+    }),
 
-  removeFromCart: (id) => {
-    const state = get();
-    const item = state.cartItems.find((i) => i.id === id);
-    if (item) notify.quantityUpdated(item.name, 0);
-    set({ cartItems: state.cartItems.filter((item) => item.id !== id) });
-  },
+  increase: (id) =>
+    set((state) => {
+      const item = state.items.find((item) => item.id === id);
+      if (item) {
+        if (item.quantity < item.stock) {
+          item.quantity += 1;
+          notify.quantityUpdated(item.name, item.quantity);
+        } else {
+          notify.outOfStockLimit(item.name, item.stock);
+        }
+      }
+      return { items: [...state.items] };
+    }),
 
-  clearCart: () => {
-    set({ cartItems: [] });
-    notify.cartCleared();
-  },
+  decrease: (id) =>
+    set((state) => {
+      const item = state.items.find((item) => item.id === id);
+      if (item && item.quantity > 1) {
+        item.quantity -= 1;
+        notify.quantityUpdated(item.name, item.quantity);
+      }
+      return { items: [...state.items] };
+    }),
 
-  increase: (id) => {
-    const state = get();
-    const item = state.cartItems.find((i) => i.id === id);
-    if (!item) return;
-    if (item.quantity + 1 > item.maxQuantity) {
-      notify.outOfStock(item.name, item.maxQuantity);
-      return;
-    }
-    set({
-      cartItems: state.cartItems.map((i) =>
-        i.id === id ? { ...i, quantity: i.quantity + 1 } : i
-      ),
-    });
-    notify.quantityUpdated(item.name, item.quantity + 1);
-  },
+  remove: (id) =>
+    set((state) => {
+      const item = state.items.find((item) => item.id === id);
+      if (item) notify.removed(item.name);
+      return { items: state.items.filter((item) => item.id !== id) };
+    }),
 
-  decrease: (id) => {
-    const state = get();
-    const item = state.cartItems.find((i) => i.id === id);
-    if (!item) return;
-    const newQty = item.quantity - 1;
-    set({
-      cartItems: state.cartItems
-        .map((i) => (i.id === id ? { ...i, quantity: newQty } : i))
-        .filter((i) => i.quantity > 0),
-    });
-    if (newQty > 0) notify.quantityUpdated(item.name, newQty);
-    else notify.quantityUpdated(item.name, 0);
-  },
-
-  confirmOrder: () => {
-    set({ cartItems: [] });
-    notify.orderConfirmed();
-  },
+  clear: () =>
+    set((state) => {
+      if (state.items.length > 0) notify.cleared();
+      return { items: [] };
+    }),
 }));
+
+export default useCartStore;
