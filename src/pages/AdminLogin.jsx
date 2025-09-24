@@ -8,7 +8,6 @@ const AdminLogin = () => {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    // كلمة المرور الخاصة بالمسؤول
     const adminPassword = process.env.REACT_APP_ADMIN_PASSWORD || "admin123";
     
     if (password === adminPassword) {
