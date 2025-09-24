@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -17,13 +17,15 @@ import Contact from "./pages/Contact";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+import { useSettingsStore } from "./store/settingsStore";
+
 function App() {
+  const { isAdmin } = useSettingsStore();
+
   return (
     <div className="min-h-screen flex flex-col">
-      {/* الهيدر */}
       <Header />
 
-      {/* الصفحات */}
       <main className="flex-1 p-4">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -33,16 +35,20 @@ function App() {
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/review" element={<OrderReview />} />
+
+          {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/*" element={<AdminDashboard />} />
+          <Route
+            path="/admin/*"
+            element={isAdmin ? <AdminDashboard /> : <Navigate to="/admin/login" />}
+          />
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
 
-      {/* الفوتر */}
       <Footer />
 
-      {/* إشعارات */}
       <ToastContainer
         position="top-right"
         autoClose={3000}
