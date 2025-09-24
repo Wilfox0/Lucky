@@ -1,21 +1,14 @@
-import React from "react";
+import { toast } from "react-toastify";
 
-const Contact = () => {
-  const phoneNumber = "+201234567890"; // رقم الواتساب
-  const whatsappLink = `https://wa.me/${phoneNumber.replace("+","")}`;
-
-  return (
-    <div className="flex justify-center items-center h-full p-8">
-      <a
-        href={whatsappLink}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="bg-green-500 hover:bg-green-600 text-white px-6 py-4 rounded-full text-xl shadow-lg transition duration-300"
-      >
-        تواصل معنا على واتساب
-      </a>
-    </div>
-  );
+const notify = {
+  added: (name) => toast.success(`${name} تمت إضافته للسلة`),
+  removed: (name) => toast.info(`${name} تم حذفه من السلة`),
+  cleared: () => toast.warn("تم إفراغ السلة بالكامل"),
+  quantityUpdated: (name, qty) =>
+    toast.info(`تم تحديث ${name} إلى ${qty} قطع`),
+  outOfStockLimit: (name, stock) =>
+    toast.error(`${name} أقصى كمية ممكنة ${stock}`),
+  orderConfirmed: () => toast.success("تم تأكيد الطلب بنجاح"),
 };
 
-export default Contact;
+export default notify;
