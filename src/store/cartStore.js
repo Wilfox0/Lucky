@@ -1,62 +1,65 @@
 import { create } from "zustand";
-import notify from "../components/ToastNotification";
+import { toast } from "react-hot-toast";
 
-const useCartStore = create((set) => ({
-  items: [],
+const useCartStore = create((set, get) => ({
+  cart: [],
 
-  add: (product) =>
-    set((state) => {
-      const existing = state.items.find((item) => item.id === product.id);
-      if (existing) {
-        if (existing.quantity < product.stock) {
-          existing.quantity += 1;
-          notify.quantityUpdated(product.name, existing.quantity);
-        } else {
-          notify.outOfStockLimit(product.name, product.stock);
-        }
-      } else {
-        state.items.push({ ...product, quantity: 1 });
-        notify.added(product.name);
+  addToCart: (product, selectedColor, selectedSize, quantity = 1) => {
+    const cart = get().cart;
+    const existingItemIndex = cart.findIndex(
+      (item) =>
+        item.id === product.id &&
+        item.color === selectedColor &&
+        item.size === selectedSize
+    );
+
+    if (existingItemIndex >= 0) {
+      const existingItem = cart[existingItemIndex];
+      const newQuantity = existingItem.quantity + quantity;
+
+      if (newQuantity > product.quantity) {
+        toast.error(`الحد الأقصى المتاح هو ${product.quantity} قطعة فقط`);
+        return;
       }
-      return { items: [...state.items] };
-    }),
 
-  increase: (id) =>
-    set((state) => {
-      const item = state.items.find((item) => item.id === id);
-      if (item) {
-        if (item.quantity < item.stock) {
-          item.quantity += 1;
-          notify.quantityUpdated(item.name, item.quantity);
-        } else {
-          notify.outOfStockLimit(item.name, item.stock);
-        }
+      const updatedItem = { ...existingItem, quantity: newQuantity };
+      const updatedCart = [...cart];
+      updatedCart[existingItemIndex] = updatedItem;
+
+      set({ cart: updatedCart });
+      toast.success("تم تحديث الكمية في السلة");
+    } else {
+      if (quantity > product.quantity) {
+        toast.error(`الحد الأقصى المتاح هو ${product.quantity} قطعة فقط`);
+        return;
       }
-      return { items: [...state.items] };
-    }),
 
-  decrease: (id) =>
-    set((state) => {
-      const item = state.items.find((item) => item.id === id);
-      if (item && item.quantity > 1) {
-        item.quantity -= 1;
-        notify.quantityUpdated(item.name, item.quantity);
-      }
-      return { items: [...state.items] };
-    }),
+      const newItem = {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.images?.[0],
+        color: selectedColor,
+        size: selectedSize,
+        quantity,
+      };
 
-  remove: (id) =>
-    set((state) => {
-      const item = state.items.find((item) => item.id === id);
-      if (item) notify.removed(item.name);
-      return { items: state.items.filter((item) => item.id !== id) };
-    }),
+      set({ cart: [...cart, newItem] });
+      toast.success("تمت إضافة المنتج إلى السلة");
+    }
+  },
 
-  clear: () =>
-    set((state) => {
-      if (state.items.length > 0) notify.cleared();
-      return { items: [] };
-    }),
+  removeFromCart: (id, color, size) =>
+    set((state) => ({
+      cart: state.cart.filter(
+        (item) => !(item.id === id && item.color === color && item.size === size)
+      ),
+    })),
+
+  clearCart: () => {
+    set({ cart: [] });
+    toast.success("تم إفراغ السلة");
+  },
 }));
 
 export default useCartStore;
