@@ -1,100 +1,110 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { supabase } from "../utils/supabase";
+import { Link } from "react-router-dom";
 import { useCartStore } from "../store/cartStore";
+import { supabase } from '../utils/supabase';
+import notify from "./ToastNotification"; // ✅ استدعاء Notify مضبوط
 
 const Header = () => {
-  const navigate = useNavigate();
-  const cartItems = useCartStore((state) => state.items);
-  const [categories, setCategories] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
+  const cart = useCartStore((state) => state.cartItems);
+  const clearCart = useCartStore((state) => state.clearCart);
+  const [storeName, setStoreName] = useState("المتجر");
+  const [logo, setLogo] = useState(null);
 
-  // جلب الأقسام من قاعدة البيانات
   useEffect(() => {
-    const fetchCategories = async () => {
-      const { data, error } = await supabase.from("categories").select("*");
+    const fetchSettings = async () => {
+      const { data, error } = await supabase.from("settings").select("*").single();
       if (!error && data) {
-        setCategories(data);
+        setStoreName(data.store_name || "المتجر");
+        setLogo(data.logo_url || null);
       }
     };
-    fetchCategories();
+    fetchSettings();
   }, []);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/products?search=${searchQuery}`);
-    }
+  const cartCount = cart?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+
+  const handleClearCart = () => {
+    clearCart();
+    notify.cartCleared(); // ✅ استخدام دالة Toast بشكل صحيح
   };
 
   return (
-    <header className="bg-white shadow-md sticky top-0 z-50">
-      <div className="container mx-auto flex justify-between items-center p-4">
-        {/* اللوجو */}
-        <Link to="/" className="text-2xl font-bold text-green-600">
-          متجر التجربة
+    <header className="bg-pink-200 text-gray-900 p-4 flex justify-between items-center shadow-md">
+      {/* لوجو واسم المتجر */}
+      <Link
+        to="/"
+        className="flex items-center gap-3 hover:scale-105 transition-transform duration-200"
+      >
+        {logo ? (
+          <img src={logo} alt="Logo" className="w-10 h-10 rounded-full" />
+        ) : (
+          <div className="w-10 h-10 bg-pink-400 rounded-full flex items-center justify-center text-white font-bold">
+            🏬
+          </div>
+        )}
+        <h1 className="text-xl font-bold hover:text-pink-600 transition-colors duration-200">
+          {storeName}
+        </h1>
+      </Link>
+
+      {/* روابط التنقل */}
+      <nav className="flex gap-6">
+        <Link
+          to="/"
+          className="relative text-gray-900 hover:text-pink-600 transition-colors duration-200 
+                     after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 
+                     after:bg-pink-600 after:transition-all after:duration-200 hover:after:w-full"
+        >
+          الرئيسية
+        </Link>
+        <Link
+          to="/shop"
+          className="relative text-gray-900 hover:text-pink-600 transition-colors duration-200 
+                     after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 
+                     after:bg-pink-600 after:transition-all after:duration-200 hover:after:w-full"
+        >
+          المتجر
+        </Link>
+        <Link
+          to="/about"
+          className="relative text-gray-900 hover:text-pink-600 transition-colors duration-200 
+                     after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 
+                     after:bg-pink-600 after:transition-all after:duration-200 hover:after:w-full"
+        >
+          من نحن
+        </Link>
+        <Link
+          to="/contact"
+          className="relative text-gray-900 hover:text-pink-600 transition-colors duration-200 
+                     after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 
+                     after:bg-pink-600 after:transition-all after:duration-200 hover:after:w-full"
+        >
+          تواصل معنا
+        </Link>
+      </nav>
+
+      {/* سلة المشتريات */}
+      <div className="flex items-center gap-3">
+        <Link
+          to="/cart"
+          className="flex items-center gap-2 bg-pink-500 text-white px-3 py-1 rounded-full hover:bg-pink-600 transition-colors duration-200 shadow-md"
+        >
+          <span>🛒</span>
+          <span>سلة</span>
+          <span className="bg-white text-pink-500 px-2 py-1 rounded-full text-sm font-bold">
+            {cartCount}
+          </span>
         </Link>
 
-        {/* البحث */}
-        <form onSubmit={handleSearch} className="flex items-center space-x-2">
-          <input
-            type="text"
-            placeholder="ابحث عن منتج..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="border rounded px-2 py-1"
-          />
+        {cartCount > 0 && (
           <button
-            type="submit"
-            className="bg-green-600 text-white px-3 py-1 rounded"
+            onClick={handleClearCart}
+            className="bg-red-500 text-white px-3 py-1 rounded-full hover:bg-red-600 transition-colors duration-200 shadow-md"
           >
-            بحث
+            تفريغ السلة 🗑️
           </button>
-        </form>
-
-        {/* روابط */}
-        <nav className="flex items-center space-x-4">
-          <Link to="/" className="hover:text-green-600">
-            الرئيسية
-          </Link>
-          <Link to="/products" className="hover:text-green-600">
-            المنتجات
-          </Link>
-          <Link to="/about" className="hover:text-green-600">
-            من نحن
-          </Link>
-          <Link to="/contact" className="hover:text-green-600">
-            اتصل بنا
-          </Link>
-
-          {/* السلة */}
-          <Link to="/cart" className="relative">
-            🛒
-            {cartItems.length > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-1 rounded-full">
-                {cartItems.length}
-              </span>
-            )}
-          </Link>
-        </nav>
+        )}
       </div>
-
-      {/* الأقسام */}
-      {categories.length > 0 && (
-        <div className="bg-gray-100 py-2">
-          <div className="container mx-auto flex space-x-4 overflow-x-auto">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => navigate(`/products?category=${cat.name}`)}
-                className="px-3 py-1 bg-white rounded shadow hover:bg-green-100"
-              >
-                {cat.name}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
     </header>
   );
 };
