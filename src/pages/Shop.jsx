@@ -1,13 +1,10 @@
 import React from "react";
-import Products from "./Products";
 
-const Shop = () => {
+export default function Shop() {
   return (
-    <div className="space-y-6">
+    <div className="shop p-6">
       <h1 className="text-3xl font-bold mb-4">المتجر</h1>
-      <Products />
+      <p>صفحة المتجر الرئيسية.</p>
     </div>
   );
-};
-
-export default Shop;
+}
