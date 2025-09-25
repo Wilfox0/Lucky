@@ -1,68 +1,48 @@
 import React, { useEffect, useState } from "react";
-import { supabase } from "../../utils/supabase";
-import notify from "../../components/ToastNotification";
+import { supabase } from '../../utils/supabase';
 
-const SocialLinksManagement = () => {
-  const [links, setLinks] = useState([]);
-  const [platform, setPlatform] = useState("WhatsApp");
-  const [url, setUrl] = useState("");
 
-  const fetchLinks = async () => {
-    const { data, error } = await supabase.from("social_links").select("*");
-    if (error) console.log(error);
-    else setLinks(data);
-  };
+
+export default function SocialLinksManagement() {
+  const [links, setLinks] = useState({ facebook: "", instagram: "", whatsapp: "" });
 
   useEffect(() => {
+    const fetchLinks = async () => {
+      const { data } = await supabase.from("social_links").select("*").single();
+      if (data) setLinks(data);
+    };
     fetchLinks();
   }, []);
 
-  const addLink = async (e) => {
-    e.preventDefault();
-    const { data, error } = await supabase
-      .from("social_links")
-      .insert([{ platform, url }]);
-    if (error) console.log(error);
-    else {
-      notify.added(platform);
-      setUrl("");
-      fetchLinks();
-    }
+  const handleChange = (e) => setLinks({ ...links, [e.target.name]: e.target.value });
+
+  const handleSave = async () => {
+    await supabase.from("social_links").upsert({ id: 1, ...links });
+    alert("✅ تم حفظ الروابط!");
   };
 
   return (
     <div>
-      <h2 className="text-xl mb-4">روابط التواصل</h2>
-      <form onSubmit={addLink} className="mb-6">
-        <select
-          value={platform}
-          onChange={(e) => setPlatform(e.target.value)}
-          className="border p-2 rounded mr-2"
-        >
-          <option>WhatsApp</option>
-          <option>Facebook</option>
-          <option>Instagram</option>
-        </select>
-        <input
-          type="text"
-          placeholder="الرابط أو رقم الواتس"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          className="border p-2 rounded mr-2"
-          required
-        />
-        <button className="bg-blue-500 text-white px-4 py-2 rounded">إضافة</button>
-      </form>
+      <h2 className="text-xl mb-4">🔗 إدارة روابط التواصل</h2>
 
-      <ul>
-        {links.map((l) => (
-          <li key={l.id} className="mb-2 border p-2 rounded">
-            {l.platform}: {l.url}
-          </li>
-        ))}
-      </ul>
+      <div className="mb-4">
+        <label>🌐 فيسبوك</label>
+        <input type="text" name="facebook" value={links.facebook} onChange={handleChange} className="border p-2 w-full rounded" />
+      </div>
+
+      <div className="mb-4">
+        <label>📸 انستجرام</label>
+        <input type="text" name="instagram" value={links.instagram} onChange={handleChange} className="border p-2 w-full rounded" />
+      </div>
+
+      <div className="mb-4">
+        <label>💬 واتساب</label>
+        <input type="text" name="whatsapp" value={links.whatsapp} onChange={handleChange} className="border p-2 w-full rounded" />
+      </div>
+
+      <button onClick={handleSave} className="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600">
+        💾 حفظ
+      </button>
     </div>
   );
-};
-
-export default SocialLinksManagement;
+}
