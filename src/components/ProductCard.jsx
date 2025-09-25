@@ -2,31 +2,46 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useCartStore } from "../store/cartStore";
 
-export default function ProductCard({ product }) {
+const ProductCard = ({ product }) => {
   const { addToCart } = useCartStore();
 
   return (
-    <div className="bg-white rounded-2xl shadow hover:shadow-lg p-3 text-center">
-      <img src={product.image} alt={product.name} className="w-full h-48 object-cover rounded-xl" />
-      <h3 className="text-lg font-semibold mt-2">{product.name}</h3>
-      <p className="text-pink-700 font-bold">{product.price} ج.م</p>
-      <div className="flex justify-center mt-2">
-        {"⭐".repeat(product.rating)}
-      </div>
-      <div className="flex justify-between items-center mt-3">
-        <Link
-          to={`/product/${product.id}`}
-          className="bg-pink-300 text-white px-3 py-1 rounded-lg hover:bg-pink-400"
-        >
-          التفاصيل
-        </Link>
+    <div className="border p-4 rounded shadow hover:shadow-lg transition">
+      <Link to={`/product/${product.id}`}>
+        <img src={product.image} alt={product.name} className="w-full h-48 object-cover rounded" />
+      </Link>
+      <h2 className="text-lg font-semibold mt-2">{product.name}</h2>
+      <p className="text-gray-500 mt-1">{product.price} جنيه</p>
+
+      {/* الألوان والمقاسات */}
+      {product.colors && product.colors.length > 0 && (
+        <div className="mt-2">
+          <span className="font-semibold">الألوان: </span>
+          {product.colors.join(", ")}
+        </div>
+      )}
+      {product.sizes && product.sizes.length > 0 && (
+        <div className="mt-1">
+          <span className="font-semibold">المقاسات: </span>
+          {product.sizes.join(", ")}
+        </div>
+      )}
+
+      {/* زر الإضافة للسلة */}
+      {product.quantity > 0 ? (
         <button
           onClick={() => addToCart(product)}
-          className="bg-pink-500 text-white px-3 py-1 rounded-lg hover:bg-pink-600"
+          className="mt-3 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
         >
-          🛒
+          أضف إلى السلة
         </button>
-      </div>
+      ) : (
+        <button className="mt-3 w-full bg-gray-400 text-white py-2 rounded cursor-not-allowed">
+          تم انتهاء الكمية
+        </button>
+      )}
     </div>
   );
-}
+};
+
+export default ProductCard;
