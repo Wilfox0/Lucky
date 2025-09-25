@@ -1,74 +1,51 @@
-import React, { useEffect, useState } from "react";
-import { supabase } from '../../utils/supabase';
-
-
+import React, { useState } from "react";
+import { useSettingsStore } from "../../store/settingsStore";
+import notify from "../../components/ToastNotification";
 
 const CategoriesManagement = () => {
-  const [categories, setCategories] = useState([]);
+  const { categories, updateSetting } = useSettingsStore();
   const [newCategory, setNewCategory] = useState("");
-  const [editId, setEditId] = useState(null);
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  const fetchCategories = async () => {
-    const { data } = await supabase.from("categories").select("*");
-    setCategories(data || []);
-  };
-
-  const handleAddOrUpdate = async () => {
+  const addCategory = () => {
     if (newCategory.trim() === "") return;
-
-    if (editId) {
-      await supabase.from("categories").update({ name: newCategory }).eq("id", editId);
-    } else {
-      await supabase.from("categories").insert([{ name: newCategory }]);
-    }
-
+    const updatedCategories = [...categories, newCategory.trim()];
+    updateSetting("categories", updatedCategories);
     setNewCategory("");
-    setEditId(null);
-    fetchCategories();
+    notify.saved("تم إضافة القسم بنجاح");
   };
 
-  const handleEdit = (cat) => {
-    setNewCategory(cat.name);
-    setEditId(cat.id);
-  };
-
-  const handleDelete = async (id) => {
-    await supabase.from("categories").delete().eq("id", id);
-    fetchCategories();
+  const removeCategory = (index) => {
+    const updatedCategories = categories.filter((_, i) => i !== index);
+    updateSetting("categories", updatedCategories);
+    notify.saved("تم حذف القسم بنجاح");
   };
 
   return (
     <div>
-      <h2 className="text-xl mb-4">📂 إدارة الأقسام</h2>
-
-      <div className="flex mb-4">
+      <h2 className="text-xl font-bold mb-4">إدارة الأقسام</h2>
+      <div className="mb-4 flex gap-2">
         <input
           type="text"
-          placeholder="قسم جديد..."
+          placeholder="أضف قسم جديد"
           value={newCategory}
-          onChange={e => setNewCategory(e.target.value)}
-          className="border p-2 flex-1 rounded"
+          onChange={(e) => setNewCategory(e.target.value)}
+          className="border p-2 flex-1"
         />
-        <button
-          onClick={handleAddOrUpdate}
-          className="ml-2 bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600"
-        >
-          {editId ? "تعديل" : "➕ إضافة"}
+        <button onClick={addCategory} className="bg-blue-500 text-white p-2">
+          إضافة
         </button>
       </div>
 
-      <ul className="list-disc pl-6">
-        {categories.map(cat => (
-          <li key={cat.id} className="flex justify-between items-center mb-1">
-            <span>{cat.name}</span>
-            <div className="flex gap-2">
-              <button onClick={() => handleEdit(cat)} className="bg-yellow-500 text-white px-2 py-1 rounded">تعديل</button>
-              <button onClick={() => handleDelete(cat.id)} className="bg-red-500 text-white px-2 py-1 rounded">حذف</button>
-            </div>
+      <ul>
+        {categories.map((cat, index) => (
+          <li key={index} className="flex justify-between p-2 border-b">
+            <span>{cat}</span>
+            <button
+              onClick={() => removeCategory(index)}
+              className="text-red-500"
+            >
+              حذف
+            </button>
           </li>
         ))}
       </ul>
