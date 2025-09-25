@@ -1,72 +1,93 @@
-import React, { useEffect, useState } from "react";
-import { supabase } from '../../utils/supabase';
-
-
+import React, { useState, useEffect } from "react";
+import { supabase } from "../../utils/supabase";
+import notify from "../../components/ToastNotification";
 
 const ShippingManagement = () => {
-  const [shippingList, setShippingList] = useState([]);
-  const [city, setCity] = useState("");
-  const [price, setPrice] = useState(0);
-  const [editId, setEditId] = useState(null);
+  const [shippingZones, setShippingZones] = useState([]);
+  const [province, setProvince] = useState("");
+  const [price, setPrice] = useState("");
+
+  const fetchShipping = async () => {
+    const { data, error } = await supabase.from("shipping").select("*");
+    if (error) {
+      notify.error("فشل جلب بيانات الشحن");
+    } else {
+      setShippingZones(data);
+    }
+  };
+
+  const addShipping = async () => {
+    if (!province || !price) return;
+
+    const { error } = await supabase.from("shipping").insert([
+      { province, price: parseFloat(price) },
+    ]);
+
+    if (error) {
+      notify.error("فشل إضافة الشحن");
+    } else {
+      notify.saved("تم إضافة الشحن بنجاح");
+      setProvince("");
+      setPrice("");
+      fetchShipping();
+    }
+  };
+
+  const deleteShipping = async (id) => {
+    const { error } = await supabase.from("shipping").delete().eq("id", id);
+    if (error) {
+      notify.error("فشل حذف الشحن");
+    } else {
+      notify.saved("تم حذف الشحن بنجاح");
+      fetchShipping();
+    }
+  };
 
   useEffect(() => {
     fetchShipping();
   }, []);
 
-  const fetchShipping = async () => {
-    const { data } = await supabase.from("shipping").select("*");
-    setShippingList(data || []);
-  };
-
-  const handleAddOrUpdate = async () => {
-    if (!city || price <= 0) {
-      alert("يرجى إدخال اسم المحافظة وسعر الشحن بشكل صحيح");
-      return;
-    }
-
-    if (editId) {
-      await supabase.from("shipping").update({ city, price }).eq("id", editId);
-    } else {
-      await supabase.from("shipping").insert([{ city, price }]);
-    }
-
-    setCity(""); setPrice(0); setEditId(null);
-    fetchShipping();
-  };
-
-  const handleEdit = (s) => {
-    setCity(s.city);
-    setPrice(s.price);
-    setEditId(s.id);
-  };
-
-  const handleDelete = async (id) => {
-    await supabase.from("shipping").delete().eq("id", id);
-    fetchShipping();
-  };
-
   return (
-    <div className="p-4">
+    <div>
       <h2 className="text-xl font-bold mb-4">إدارة الشحن</h2>
-      <div className="mb-4 flex gap-2">
-        <input placeholder="اسم المحافظة" value={city} onChange={e => setCity(e.target.value)} className="border p-2"/>
-        <input type="number" placeholder="سعر الشحن" value={price} onChange={e => setPrice(Number(e.target.value))} className="border p-2"/>
-        <button onClick={handleAddOrUpdate} className="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600">
-          {editId ? "تعديل" : "إضافة"}
+      <div className="mb-4 grid grid-cols-1 md:grid-cols-3 gap-2">
+        <input
+          type="text"
+          placeholder="اسم المحافظة"
+          value={province}
+          onChange={(e) => setProvince(e.target.value)}
+          className="border p-2 col-span-1"
+        />
+        <input
+          type="number"
+          placeholder="سعر الشحن"
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+          className="border p-2 col-span-1"
+        />
+        <button
+          onClick={addShipping}
+          className="bg-blue-500 text-white p-2 col-span-1"
+        >
+          إضافة الشحن
         </button>
       </div>
 
-      <div className="space-y-2 mt-4">
-        {shippingList.map(s => (
-          <div key={s.id} className="border p-2 flex justify-between items-center">
-            <span>{s.city}: {s.price} جنيه</span>
-            <div className="flex gap-2">
-              <button onClick={() => handleEdit(s)} className="bg-yellow-500 text-white px-2 py-1 rounded">تعديل</button>
-              <button onClick={() => handleDelete(s.id)} className="bg-red-500 text-white px-2 py-1 rounded">حذف</button>
-            </div>
-          </div>
+      <ul>
+        {shippingZones.map((zone) => (
+          <li key={zone.id} className="flex justify-between p-2 border-b">
+            <span>
+              {zone.province} - {zone.price} ج.م
+            </span>
+            <button
+              onClick={() => deleteShipping(zone.id)}
+              className="text-red-500"
+            >
+              حذف
+            </button>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 };
