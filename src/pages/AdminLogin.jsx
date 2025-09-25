@@ -1,37 +1,50 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-export default function AdminLogin() {
+const AdminLogin = () => {
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    if (password === "admin123") {
-      localStorage.setItem("isAdmin", "true");
+  // كلمة المرور الافتراضية للوصول للوحة التحكم
+  const ADMIN_PASSWORD = "admin123"; // يمكنك تغييرها لاحقاً
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (password === ADMIN_PASSWORD) {
       navigate("/admin/dashboard");
     } else {
-      alert("❌ كلمة المرور غير صحيحة");
+      setError("كلمة المرور غير صحيحة");
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-2xl shadow-lg w-80 space-y-4">
-        <h2 className="text-xl font-bold text-center">تسجيل دخول الأدمن</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <form
+        onSubmit={handleLogin}
+        className="bg-white p-6 rounded-lg shadow-md w-full max-w-sm"
+      >
+        <h2 className="text-2xl font-bold mb-4 text-center">تسجيل دخول المسؤول</h2>
+
         <input
           type="password"
           placeholder="كلمة المرور"
-          className="border rounded p-2 w-full"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          className="w-full p-2 border border-gray-300 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
+
+        {error && <p className="text-red-500 mb-4">{error}</p>}
+
         <button
-          onClick={handleLogin}
-          className="w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700"
+          type="submit"
+          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition"
         >
-          دخول
+          تسجيل الدخول
         </button>
-      </div>
+      </form>
     </div>
   );
-}
+};
+
+export default AdminLogin;
