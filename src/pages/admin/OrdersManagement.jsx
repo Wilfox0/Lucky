@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from '../../utils/supabase';
-import { sendTelegramMessage } from "../../utils/telegram"; // المسار حسب موقع الملف
+
 
 const OrdersManagement = () => {
   const [orders, setOrders] = useState([]);
@@ -10,35 +10,13 @@ const OrdersManagement = () => {
   }, []);
 
   const fetchOrders = async () => {
-    try {
-      const { data, error } = await supabase.from("orders").select("*");
-      if (error) throw error;
-
-      setOrders(data || []);
-
-      // إرسال إشعار تليجرام لكل أوردر جديد
-      if (data && data.length > 0) {
-        data.forEach(async (orderData) => {
-          const message = `✅ تم استلام طلب جديد:
-العميل: ${orderData.customer_name}
-المجموع: ${orderData.total_price} جنيه`;
-          await sendTelegramMessage(message);
-        });
-      }
-
-    } catch (error) {
-      console.error(error);
-    }
+    const { data } = await supabase.from("orders").select("*");
+    setOrders(data || []);
   };
 
   const handleStatusChange = async (id, status) => {
-    try {
-      const { error } = await supabase.from("orders").update({ status }).eq("id", id);
-      if (error) throw error;
-      fetchOrders();
-    } catch (error) {
-      console.error(error);
-    }
+    await supabase.from("orders").update({ status }).eq("id", id);
+    fetchOrders();
   };
 
   return (
@@ -50,7 +28,7 @@ const OrdersManagement = () => {
             <div>
               <p><span className="font-bold">الاسم:</span> {o.customer_name}</p>
               <p><span className="font-bold">الهاتف:</span> {o.phone}</p>
-              <p><span className="font-bold">الإجمالي:</span> {o.total_price} جنيه</p>
+              <p><span className="font-bold">الإجمالي:</span> {o.total} جنيه</p>
               <p><span className="font-bold">الحالة:</span> {o.status}</p>
             </div>
             <div className="space-x-2">
