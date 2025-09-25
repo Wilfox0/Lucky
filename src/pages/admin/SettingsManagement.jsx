@@ -1,57 +1,126 @@
-import React, { useEffect, useState } from "react";
-import { supabase } from '../../utils/supabase';
-
-
+import React, { useState, useEffect } from "react";
+import { supabase } from "../../utils/supabase";
+import notify from "../../components/ToastNotification";
 
 const SettingsManagement = () => {
   const [storeName, setStoreName] = useState("");
-  const [logoUrl, setLogoUrl] = useState("");
-  const [logoFile, setLogoFile] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [socialLinks, setSocialLinks] = useState({
+    facebook: "",
+    instagram: "",
+    whatsapp: "",
+  });
+
+  const fetchSettings = async () => {
+    const { data, error } = await supabase.from("settings").select("*").single();
+    if (error) {
+      notify.error("فشل جلب الإعدادات");
+    } else if (data) {
+      setStoreName(data.storeName);
+      setCategories(data.categories || []);
+      setSocialLinks(data.socialLinks || { facebook: "", instagram: "", whatsapp: "" });
+    }
+  };
+
+  const saveSettings = async () => {
+    const { error } = await supabase
+      .from("settings")
+      .upsert({
+        id: 1,
+        storeName,
+        categories,
+        socialLinks,
+      });
+
+    if (error) {
+      notify.error("فشل حفظ الإعدادات");
+    } else {
+      notify.saved("تم حفظ الإعدادات بنجاح");
+    }
+  };
+
+  const addCategory = () => {
+    if (categories.includes("")) return;
+    setCategories([...categories, ""]);
+  };
+
+  const updateCategory = (index, value) => {
+    const updated = [...categories];
+    updated[index] = value;
+    setCategories(updated);
+  };
+
+  const removeCategory = (index) => {
+    const updated = categories.filter((_, i) => i !== index);
+    setCategories(updated);
+  };
 
   useEffect(() => {
-    const fetchSettings = async () => {
-      const { data } = await supabase.from("settings").select("*").single();
-      if (data) {
-        setStoreName(data.store_name || "");
-        setLogoUrl(data.logo_url || "");
-      }
-    };
     fetchSettings();
   }, []);
 
-  const uploadLogo = async () => {
-    if (!logoFile) return null;
-    const fileName = `logo_${Date.now()}.${logoFile.name.split(".").pop()}`;
-    const { data, error } = await supabase.storage.from("logos").upload(fileName, logoFile);
-    if (error) { alert("خطأ في رفع الصورة"); return null; }
-    const { data: urlData } = supabase.storage.from("logos").getPublicUrl(fileName);
-    return urlData.publicUrl;
-  };
-
-  const handleSave = async () => {
-    let finalLogoUrl = logoUrl;
-    if (logoFile) {
-      const uploadedUrl = await uploadLogo();
-      if (uploadedUrl) finalLogoUrl = uploadedUrl;
-    }
-    await supabase.from("settings").upsert({ id: 1, store_name: storeName, logo_url: finalLogoUrl });
-    setLogoUrl(finalLogoUrl);
-    alert("✅ تم تحديث الإعدادات بنجاح");
-  };
-
   return (
-    <div className="p-6 bg-white shadow rounded-xl">
-      <h2 className="text-2xl font-bold mb-4">إعدادات المتجر</h2>
+    <div>
+      <h2 className="text-xl font-bold mb-4">إعدادات المتجر</h2>
+
       <div className="mb-4">
-        <label className="block mb-1">اسم المتجر:</label>
-        <input type="text" value={storeName} onChange={e => setStoreName(e.target.value)} className="border p-2 w-full rounded"/>
+        <label>اسم المتجر:</label>
+        <input
+          type="text"
+          value={storeName}
+          onChange={(e) => setStoreName(e.target.value)}
+          className="border p-2 w-full"
+        />
       </div>
+
       <div className="mb-4">
-        <label className="block mb-1">اللوجو الحالي:</label>
-        {logoUrl ? <img src={logoUrl} alt="Logo" className="w-20 h-20 mb-2 rounded"/> : <p>لا يوجد لوجو بعد</p>}
-        <input type="file" accept="image/*" onChange={e => setLogoFile(e.target.files[0])} className="mt-2"/>
+        <label>الأقسام:</label>
+        {categories.map((cat, index) => (
+          <div key={index} className="flex gap-2 mb-2">
+            <input
+              type="text"
+              value={cat}
+              onChange={(e) => updateCategory(index, e.target.value)}
+              className="border p-2 flex-1"
+            />
+            <button onClick={() => removeCategory(index)} className="text-red-500">
+              حذف
+            </button>
+          </div>
+        ))}
+        <button onClick={addCategory} className="bg-blue-500 text-white p-2">
+          إضافة قسم
+        </button>
       </div>
-      <button onClick={handleSave} className="bg-blue-600 text-white px-4 py-2 rounded-lg">💾 حفظ الإعدادات</button>
+
+      <div className="mb-4">
+        <label>روابط السوشيال:</label>
+        <input
+          type="text"
+          placeholder="Facebook"
+          value={socialLinks.facebook}
+          onChange={(e) => setSocialLinks({ ...socialLinks, facebook: e.target.value })}
+          className="border p-2 w-full mb-2"
+        />
+        <input
+          type="text"
+          placeholder="Instagram"
+          value={socialLinks.instagram}
+          onChange={(e) => setSocialLinks({ ...socialLinks, instagram: e.target.value })}
+          className="border p-2 w-full mb-2"
+        />
+        <input
+          type="text"
+          placeholder="Whatsapp"
+          value={socialLinks.whatsapp}
+          onChange={(e) => setSocialLinks({ ...socialLinks, whatsapp: e.target.value })}
+          className="border p-2 w-full"
+        />
+      </div>
+
+      <button onClick={saveSettings} className="bg-green-500 text-white p-2">
+        حفظ الإعدادات
+      </button>
     </div>
   );
 };
