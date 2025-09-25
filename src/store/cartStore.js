@@ -25,25 +25,25 @@ export const useCartStore = create((set, get) => ({
             : item
         ),
       });
-      notify.quantityUpdated(product.name, existing.quantity + 1);
+      notify.quantityUpdated(product.name, existing.quantity + 1, true); // ✅ إضافة true لتجنب تكرار الرسالة
     } else {
       set({
         cartItems: [...state.cartItems, { ...product, quantity: 1, maxQuantity: product.quantity }],
       });
-      notify.addToCart(product.name, 1);
+      notify.addToCart(product.name, 1, true); // ✅ إضافة true لتجنب تكرار الرسالة
     }
   },
 
   removeFromCart: (id) => {
     const state = get();
     const item = state.cartItems.find((i) => i.id === id);
-    if (item) notify.quantityUpdated(item.name, 0);
+    if (item) notify.quantityUpdated(item.name, 0, true); // ✅ رسالة مرة واحدة
     set({ cartItems: state.cartItems.filter((item) => item.id !== id) });
   },
 
   clearCart: () => {
     set({ cartItems: [] });
-    notify.cartCleared();
+    notify.cartCleared(true); // ✅ رسالة مرة واحدة
   },
 
   increase: (id) => {
@@ -59,7 +59,7 @@ export const useCartStore = create((set, get) => ({
         i.id === id ? { ...i, quantity: i.quantity + 1 } : i
       ),
     });
-    notify.quantityUpdated(item.name, item.quantity + 1);
+    notify.quantityUpdated(item.name, item.quantity + 1, true); // ✅ رسالة مرة واحدة
   },
 
   decrease: (id) => {
@@ -72,12 +72,12 @@ export const useCartStore = create((set, get) => ({
         .map((i) => (i.id === id ? { ...i, quantity: newQty } : i))
         .filter((i) => i.quantity > 0),
     });
-    if (newQty > 0) notify.quantityUpdated(item.name, newQty);
-    else notify.quantityUpdated(item.name, 0);
+    if (newQty > 0) notify.quantityUpdated(item.name, newQty, true);
+    else notify.quantityUpdated(item.name, 0, true);
   },
 
   confirmOrder: () => {
     set({ cartItems: [] });
-    notify.orderConfirmed();
+    notify.orderConfirmed(true); // ✅ رسالة مرة واحدة
   },
 }));
