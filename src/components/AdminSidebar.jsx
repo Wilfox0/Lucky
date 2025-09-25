@@ -3,41 +3,26 @@ import { Link } from "react-router-dom";
 
 const AdminSidebar = () => {
   return (
-    <aside className="w-64 bg-gray-800 text-white min-h-screen p-4">
-      <h2 className="text-xl font-bold mb-6">لوحة التحكم</h2>
-      <ul className="space-y-4">
+    <aside className="w-64 bg-white shadow-md p-4">
+      <h2 className="text-xl font-bold mb-4">لوحة التحكم</h2>
+      <ul className="flex flex-col gap-2">
         <li>
-          <Link to="/admin/dashboard" className="hover:text-yellow-400">
-            الرئيسية
-          </Link>
-        </li>
-        <li>
-          <Link to="/admin/products" className="hover:text-yellow-400">
+          <Link to="/admin/dashboard/products" className="hover:text-pink-500 transition">
             إدارة المنتجات
           </Link>
         </li>
         <li>
-          <Link to="/admin/categories" className="hover:text-yellow-400">
+          <Link to="/admin/dashboard/categories" className="hover:text-pink-500 transition">
             إدارة الأقسام
           </Link>
         </li>
         <li>
-          <Link to="/admin/shipping" className="hover:text-yellow-400">
-            إدارة الشحن
-          </Link>
-        </li>
-        <li>
-          <Link to="/admin/social-links" className="hover:text-yellow-400">
+          <Link to="/admin/dashboard/social-links" className="hover:text-pink-500 transition">
             روابط التواصل
           </Link>
         </li>
         <li>
-          <Link to="/admin/orders" className="hover:text-yellow-400">
-            إدارة الطلبات
-          </Link>
-        </li>
-        <li>
-          <Link to="/admin/settings" className="hover:text-yellow-400">
+          <Link to="/admin/dashboard/settings" className="hover:text-pink-500 transition">
             إعدادات المتجر
           </Link>
         </li>
