@@ -1,40 +1,37 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const AdminLogin = () => {
+export default function AdminLogin() {
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    const adminPassword = process.env.REACT_APP_ADMIN_PASSWORD || "admin123";
-    if (password === adminPassword) {
+  const handleLogin = () => {
+    if (password === "admin123") {
       localStorage.setItem("isAdmin", "true");
       navigate("/admin/dashboard");
     } else {
-      setError("كلمة المرور غير صحيحة");
+      alert("❌ كلمة المرور غير صحيحة");
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
-      <h1 className="text-3xl font-bold mb-6">تسجيل دخول المسؤول</h1>
-      <form onSubmit={handleLogin} className="bg-white p-6 rounded shadow-md w-full max-w-sm">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <div className="bg-white p-8 rounded-2xl shadow-lg w-80 space-y-4">
+        <h2 className="text-xl font-bold text-center">تسجيل دخول الأدمن</h2>
         <input
           type="password"
           placeholder="كلمة المرور"
+          className="border rounded p-2 w-full"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full mb-4 p-3 border rounded"
         />
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-        <button type="submit" className="w-full bg-blue-500 text-white p-3 rounded hover:bg-blue-600">
-          تسجيل الدخول
+        <button
+          onClick={handleLogin}
+          className="w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700"
+        >
+          دخول
         </button>
-      </form>
+      </div>
     </div>
   );
-};
-
-export default AdminLogin;
+}
